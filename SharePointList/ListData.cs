@@ -26,7 +26,7 @@ namespace Plumsail.DataSource.SharePointList
             _settings = settings.Value;
         }
 
-        [FunctionName("ListData")]
+        [FunctionName("SharePointListData")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
