@@ -2,8 +2,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AzureFunctionsVersion>v3</AzureFunctionsVersion>
-    <AssemblyName>Plumsail.DataSource.SharePointList</AssemblyName>
-    <RootNamespace>Plumsail.DataSource.SharePointList</RootNamespace>
+    <AssemblyName>Plumsail.DataSource.SharePoint</AssemblyName>
+    <RootNamespace>Plumsail.DataSource.SharePoint</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />

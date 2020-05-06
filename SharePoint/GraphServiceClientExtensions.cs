@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Plumsail.DataSource.SharePointList
+namespace Plumsail.DataSource.SharePoint
 {
     internal static class GraphServiceClientExtensions
     {

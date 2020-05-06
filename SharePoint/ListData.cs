@@ -15,18 +15,18 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Extensions.Options;
 
-namespace Plumsail.DataSource.SharePointList
+namespace Plumsail.DataSource.SharePoint
 {
     public class ListData
     {
-        private Settings _settings;
+        private Settings.AppSettings _settings;
 
-        public ListData(IOptions<Settings> settings)
+        public ListData(IOptions<Settings.AppSettings> settings)
         {
             _settings = settings.Value;
         }
 
-        [FunctionName("SharePointListData")]
+        [FunctionName("SharePoint-ListData")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
@@ -40,7 +40,7 @@ namespace Plumsail.DataSource.SharePointList
 
             var authProvider = new ClientCredentialProvider(confidentialClientApplication);
             var graph = new GraphServiceClient(authProvider);
-            var list = await graph.GetListAsync(_settings.SiteUrl, _settings.ListName);
+            var list = await graph.GetListAsync(_settings.ListData.SiteUrl, _settings.ListData.ListName);
 
             var queryOptions = new List<QueryOption>()
             {

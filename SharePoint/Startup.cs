@@ -1,10 +1,11 @@
 ﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Plumsail.DataSource.SharePoint.Settings;
 using System;
 
-[assembly: FunctionsStartup(typeof(Plumsail.DataSource.SharePointList.Startup))]
-namespace Plumsail.DataSource.SharePointList
+[assembly: FunctionsStartup(typeof(Plumsail.DataSource.SharePoint.Startup))]
+namespace Plumsail.DataSource.SharePoint
 {
     public class Startup : FunctionsStartup
     {
@@ -16,7 +17,7 @@ namespace Plumsail.DataSource.SharePointList
               .AddEnvironmentVariables()
               .Build();
 
-            builder.Services.Configure<Settings>(configuration.GetSection("SharePointList"));
+            builder.Services.Configure<AppSettings>(configuration.GetSection("SharePoint"));
         }
     }
 }
