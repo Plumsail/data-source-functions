@@ -8,5 +8,6 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral.Settings
     {
         public AzureApp AzureApp { get; set; }
         public Customers Customers { get; set; }
+        public Vendors Vendors { get; set; }
     }
 }
