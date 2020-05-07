@@ -13,7 +13,7 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
     public class GraphServiceClientProvider
     {
-        private AzureApp _azureAppSettings;
+        private readonly AzureApp _azureAppSettings;
 
         public GraphServiceClientProvider(IOptions<AppSettings> settings)
         {

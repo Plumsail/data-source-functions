@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharePoint", "SharePoint\Sh
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dynamics365.BusinessCentral", "Dynamics365\BusinessCentral\Dynamics365.BusinessCentral.csproj", "{B0CB2C8F-B264-4AA4-8CBE-35F32791E870}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FunctionsApp", "FunctionsApp\FunctionsApp.csproj", "{EFCE1BCA-A1D8-46D5-8681-5D96C16FC760}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{B0CB2C8F-B264-4AA4-8CBE-35F32791E870}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0CB2C8F-B264-4AA4-8CBE-35F32791E870}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0CB2C8F-B264-4AA4-8CBE-35F32791E870}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFCE1BCA-A1D8-46D5-8681-5D96C16FC760}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFCE1BCA-A1D8-46D5-8681-5D96C16FC760}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFCE1BCA-A1D8-46D5-8681-5D96C16FC760}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFCE1BCA-A1D8-46D5-8681-5D96C16FC760}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

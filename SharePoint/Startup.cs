@@ -18,6 +18,7 @@ namespace Plumsail.DataSource.SharePoint
               .Build();
 
             builder.Services.Configure<AppSettings>(configuration.GetSection("SharePoint"));
+            builder.Services.AddTransient<GraphServiceClientProvider>();
         }
     }
 }

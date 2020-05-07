@@ -23,8 +23,8 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
     public class Customers
     {
-        private Settings.Customers _settings;
-        private GraphServiceClientProvider _graphProvider;
+        private readonly Settings.Customers _settings;
+        private readonly GraphServiceClientProvider _graphProvider;
 
         public Customers(IOptions<AppSettings> settings, GraphServiceClientProvider graphProvider)
         {

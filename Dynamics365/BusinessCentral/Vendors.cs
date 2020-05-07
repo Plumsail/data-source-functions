@@ -23,8 +23,8 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
     public class Vendors
     {
-        private Settings.Vendors _settings;
-        private GraphServiceClientProvider _graphProvider;
+        private readonly Settings.Vendors _settings;
+        private readonly GraphServiceClientProvider _graphProvider;
 
         public Vendors(IOptions<AppSettings> settings, GraphServiceClientProvider graphProvider)
         {

@@ -23,11 +23,11 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
     public class Authorize
     {
-        private AppSettings _settings;
+        private readonly AzureApp _settings;
 
         public Authorize(IOptions<AppSettings> settings)
         {
-            _settings = settings.Value;
+            _settings = settings.Value.AzureApp;
         }
 
         [FunctionName("Dynamics365-BusinessCentral-Authorize")]
@@ -43,9 +43,9 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
             {
                 var code = queryParams["code"];
 
-                var app = ConfidentialClientApplicationBuilder.Create(_settings.AzureApp.ClientId)
-                    .WithClientSecret(_settings.AzureApp.ClientSecret)
-                    .WithTenantId(_settings.AzureApp.Tenant)
+                var app = ConfidentialClientApplicationBuilder.Create(_settings.ClientId)
+                    .WithClientSecret(_settings.ClientSecret)
+                    .WithTenantId(_settings.Tenant)
                     .WithRedirectUri(currentUrl)
                     .Build();
 
@@ -57,8 +57,8 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
             }
 
             var url = new StringBuilder();
-            url.Append($"https://login.microsoftonline.com/{_settings.AzureApp.Tenant}/oauth2/v2.0/authorize?");
-            url.Append($"client_id={_settings.AzureApp.ClientId}&");
+            url.Append($"https://login.microsoftonline.com/{_settings.Tenant}/oauth2/v2.0/authorize?");
+            url.Append($"client_id={_settings.ClientId}&");
             url.Append($"response_type=code&");
             url.Append($"redirect_uri={WebUtility.UrlEncode(currentUrl)}&");
             url.Append($"response_mode=query&");
