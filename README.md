@@ -1,6 +1,6 @@
-# Azure Functions for retriving data from SharePoint Online and Dynamics 365 using Azue AD App and Microsoft Graph API
+# Azure Functions for retriving data from SharePoint Online and Dynamics 365 Business Central using Azue AD App and Microsoft Graph API
 
-This repository contains Azure Functions for retrieving data from a SharePoint list and Dynamics 365 (coming soon). These functions can be used anonymously without additional authentication or requesting permissions from the end-user. For instance, they can be utilized in public web forms as data sources of choice fields, e.g. drop-downs, checkboxes, or radios. [Read the article](https://medium.com/plumsail/how-to-provide-public-access-to-sharepoint-online-list-data-via-azure-function-using-azure-ad-app-f25f881d7328) for more details.
+This repository contains Azure Functions for retrieving data from a SharePoint list and Dynamics 365 Business Central. These functions can be used anonymously without additional authentication or requesting permissions from the end-user. For instance, they can be utilized in public web forms as data sources of choice fields, e.g. drop-downs, checkboxes, or radios. [Read the article](https://medium.com/plumsail/how-to-provide-public-access-to-sharepoint-online-list-data-via-azure-function-using-azure-ad-app-f25f881d7328) for more details.
 
 ## Installation
 
