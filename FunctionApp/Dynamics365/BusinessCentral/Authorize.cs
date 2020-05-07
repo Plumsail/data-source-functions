@@ -32,16 +32,15 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 
         [FunctionName("D365-BC-Authorize")]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
             var scopes = new string[] { "https://graph.microsoft.com/.default", "offline_access" };
             var currentUrl = UriHelper.BuildAbsolute(req.Scheme, req.Host, req.PathBase, req.Path);
 
-            var queryParams = req.GetQueryParameterDictionary();
-            if (queryParams.ContainsKey("code"))
+            if (req.Method == "POST" && req.Form.ContainsKey("code"))
             {
-                var code = queryParams["code"];
+                var code = req.Form["code"].FirstOrDefault();
 
                 var app = ConfidentialClientApplicationBuilder.Create(_settings.ClientId)
                     .WithClientSecret(_settings.ClientSecret)
@@ -61,7 +60,7 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
             url.Append($"client_id={_settings.ClientId}&");
             url.Append($"response_type=code&");
             url.Append($"redirect_uri={WebUtility.UrlEncode(currentUrl)}&");
-            url.Append($"response_mode=query&");
+            url.Append($"response_mode=form_post&");
             url.Append($"scope={WebUtility.UrlEncode(string.Join(" ", scopes))}&");
             return new RedirectResult(url.ToString(), false);
         }
