@@ -36,7 +36,6 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
             ILogger log)
         {
             var scopes = new string[] { "https://graph.microsoft.com/.default", "offline_access" };
-            var currentUrl = UriHelper.BuildAbsolute(req.Scheme, req.Host, req.PathBase, req.Path);
 
             if (req.Method == "POST" && req.Form.ContainsKey("code"))
             {
@@ -45,7 +44,7 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
                 var app = ConfidentialClientApplicationBuilder.Create(_settings.ClientId)
                     .WithClientSecret(_settings.ClientSecret)
                     .WithTenantId(_settings.Tenant)
-                    .WithRedirectUri(currentUrl)
+                    .WithRedirectUri(req.GetDisplayUrl())
                     .Build();
 
                 TokenCacheHelper.EnableSerialization(app.UserTokenCache);
@@ -59,7 +58,7 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
             url.Append($"https://login.microsoftonline.com/{_settings.Tenant}/oauth2/v2.0/authorize?");
             url.Append($"client_id={_settings.ClientId}&");
             url.Append($"response_type=code&");
-            url.Append($"redirect_uri={WebUtility.UrlEncode(currentUrl)}&");
+            url.Append($"redirect_uri={req.GetEncodedUrl()}&");
             url.Append($"response_mode=form_post&");
             url.Append($"scope={WebUtility.UrlEncode(string.Join(" ", scopes))}&");
             return new RedirectResult(url.ToString(), false);
