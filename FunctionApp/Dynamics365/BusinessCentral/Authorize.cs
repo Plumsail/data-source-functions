@@ -30,7 +30,7 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
             _settings = settings.Value.AzureApp;
         }
 
-        [FunctionName("Dynamics365-BusinessCentral-Authorize")]
+        [FunctionName("D365-BC-Authorize")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
             ILogger log)
@@ -53,7 +53,7 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 
                 _ = await app.AcquireTokenByAuthorizationCode(scopes, code).ExecuteAsync();
 
-                return new OkResult();
+                return new OkObjectResult("The app is authorized to perform operations on behalf of your account.");
             }
 
             var url = new StringBuilder();

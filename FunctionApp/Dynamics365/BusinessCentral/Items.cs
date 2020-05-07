@@ -32,7 +32,7 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
             _graphProvider = graphProvider;
         }
 
-        [FunctionName("Dynamics365-BusinessCentral-Items")]
+        [FunctionName("D365-BC-Items")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
             ILogger log)

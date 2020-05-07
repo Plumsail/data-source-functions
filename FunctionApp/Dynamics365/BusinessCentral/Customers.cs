@@ -21,23 +21,23 @@ using System.Net;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
-    public class Vendors
+    public class Customers
     {
-        private readonly Settings.Vendors _settings;
+        private readonly Settings.Customers _settings;
         private readonly GraphServiceClientProvider _graphProvider;
 
-        public Vendors(IOptions<AppSettings> settings, GraphServiceClientProvider graphProvider)
+        public Customers(IOptions<AppSettings> settings, GraphServiceClientProvider graphProvider)
         {
-            _settings = settings.Value.Vendors;
+            _settings = settings.Value.Customers;
             _graphProvider = graphProvider;
         }
 
-        [FunctionName("Dynamics365-BusinessCentral-Vendors")]
+        [FunctionName("D365-BC-Customers")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("Dynamics365-BusinessCentral-Vendors is requested.");
+            log.LogInformation("Dynamics365-BusinessCentral-Customers is requested.");
 
             var graph = await _graphProvider.Create();
             var company = await graph.GetCompanyAsync(_settings.Company);
@@ -46,15 +46,15 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
                 return new NotFoundResult();
             }
 
-            var vendorsPage = await graph.Financials.Companies[company.Id].Vendors.Request().GetAsync();
-            var vendors = new List<Vendor>(vendorsPage);
-            while (vendorsPage.NextPageRequest != null)
+            var customersPage = await graph.Financials.Companies[company.Id].Customers.Request().GetAsync();
+            var customers = new List<Customer>(customersPage);
+            while (customersPage.NextPageRequest != null)
             {
-                vendorsPage = await vendorsPage.NextPageRequest.GetAsync();
-                vendors.AddRange(vendorsPage);
+                customersPage = await customersPage.NextPageRequest.GetAsync();
+                customers.AddRange(customersPage);
             }
 
-            return new OkObjectResult(vendors);
+            return new OkObjectResult(customers);
         }
     }
 }
