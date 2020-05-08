@@ -2,15 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Plumsail.DataSource.SharePointList
+namespace Plumsail.DataSource.SharePoint.Settings
 {
-    public class Settings
-    {
-        public string SiteUrl { get; set; }
-        public string ListName { get; set; }
-        public AzureApp AzureApp { get; set; }
-    }
-
     public class AzureApp
     {
         public string ClientId { get; set; }

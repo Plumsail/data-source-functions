@@ -15,31 +15,27 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Extensions.Options;
 
-namespace Plumsail.DataSource.SharePointList
+namespace Plumsail.DataSource.SharePoint
 {
     public class ListData
     {
-        private Settings _settings;
+        private readonly Settings.ListData _settings;
+        private readonly GraphServiceClientProvider _graphProvider;
 
-        public ListData(IOptions<Settings> settings)
+        public ListData(IOptions<Settings.AppSettings> settings, GraphServiceClientProvider graphProvider)
         {
-            _settings = settings.Value;
+            _settings = settings.Value.ListData;
+            _graphProvider = graphProvider;
         }
 
-        [FunctionName("SharePointListData")]
+        [FunctionName("SharePoint-ListData")]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("ListData is requested.");
 
-            var confidentialClientApplication = ConfidentialClientApplicationBuilder.Create(_settings.AzureApp.ClientId)
-                .WithClientSecret(_settings.AzureApp.ClientSecret)
-                .WithTenantId(_settings.AzureApp.Tenant)
-                .Build();
-
-            var authProvider = new ClientCredentialProvider(confidentialClientApplication);
-            var graph = new GraphServiceClient(authProvider);
+            var graph = _graphProvider.Create();
             var list = await graph.GetListAsync(_settings.SiteUrl, _settings.ListName);
 
             var queryOptions = new List<QueryOption>()
