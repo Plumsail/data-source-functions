@@ -47,7 +47,8 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
                     .WithRedirectUri(req.GetDisplayUrl())
                     .Build();
 
-                TokenCacheHelper.EnableSerialization(app.UserTokenCache);
+                var cache = new TokenCacheHelper(AzureApp.CacheFileDir);
+                cache.EnableSerialization(app.UserTokenCache);
 
                 _ = await app.AcquireTokenByAuthorizationCode(scopes, code).ExecuteAsync();
 

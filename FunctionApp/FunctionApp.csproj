@@ -9,6 +9,7 @@
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Graph.Auth" Version="1.0.0-preview.4" />
     <PackageReference Include="Microsoft.Graph.Beta" Version="0.17.0-preview" />
+    <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="5.2.7" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.3" />
   </ItemGroup>
   <ItemGroup>
