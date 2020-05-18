@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Identity.Client;
 using Plumsail.DataSource.Dynamics365.CRM.Settings;
 using System;
 using System.Collections.Generic;
@@ -45,11 +45,17 @@ namespace Plumsail.DataSource.Dynamics365.CRM
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var credentials = new ClientCredential(_azureAppSettings.ClientId, _azureAppSettings.ClientSecret);
-            var authContext = new AuthenticationContext($"https://login.microsoftonline.com/{_azureAppSettings.Tenant}");
-            var result = await authContext.AcquireTokenAsync(_azureAppSettings.DynamicsUrl, credentials);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
+            var app = ConfidentialClientApplicationBuilder.Create(_azureAppSettings.ClientId)
+               .WithClientSecret(_azureAppSettings.ClientSecret)
+               .WithTenantId(_azureAppSettings.Tenant)
+               .Build();
 
+            var cache = new TokenCacheHelper(AzureApp.CacheFileDir);
+            cache.EnableSerialization(app.UserTokenCache);
+
+            var accounts = await app.GetAccountsAsync();
+            var result = await app.AcquireTokenSilent(new string[] { $"{_azureAppSettings.DynamicsUrl}/user_impersonation" }, accounts.FirstOrDefault()).ExecuteAsync();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
             return await base.SendAsync(request, cancellationToken);
         }
     }

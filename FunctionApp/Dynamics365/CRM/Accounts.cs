@@ -22,24 +22,24 @@ using Newtonsoft.Json.Linq;
 
 namespace Plumsail.DataSource.Dynamics365.CRM
 {
-    public class Contacts
+    public class Accounts
     {
         private readonly HttpClientProvider _httpClientProvider;
 
-        public Contacts(HttpClientProvider httpClientProvider)
+        public Accounts(HttpClientProvider httpClientProvider)
         {
             _httpClientProvider = httpClientProvider;
         }
 
-        [FunctionName("D365-CRM-Contacts")]
+        [FunctionName("D365-CRM-Accounts")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("Dynamics365-CRM-Contacts is requested.");
+            log.LogInformation("Dynamics365-CRM-Accounts is requested.");
 
             var client = _httpClientProvider.Create();
-            var contactsJson = await client.GetStringAsync("contacts");
+            var contactsJson = await client.GetStringAsync("accounts");
             var contacts = JObject.Parse(contactsJson);
 
             return new OkObjectResult(contacts["value"]);
