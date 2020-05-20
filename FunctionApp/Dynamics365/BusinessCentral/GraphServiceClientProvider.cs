@@ -27,7 +27,8 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
                 .WithTenantId(_azureAppSettings.Tenant)
                 .Build();
 
-            TokenCacheHelper.EnableSerialization(app.UserTokenCache);
+            var cache = new TokenCacheHelper(AzureApp.CacheFileDir);
+            cache.EnableSerialization(app.UserTokenCache);
 
             var accounts = await app.GetAccountsAsync();
 

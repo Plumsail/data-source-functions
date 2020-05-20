@@ -5,23 +5,28 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Plumsail.DataSource.Dynamics365.BusinessCentral
+namespace Plumsail.DataSource
 {
     class TokenCacheHelper
     {
-        public static readonly string CacheFileDir = Environment.ExpandEnvironmentVariables(@"%HOME%\data\Dynamics365.BusinessCentral");
-        public static readonly string CacheFilePath = Path.Combine(CacheFileDir, "msal.cache");
-        private static readonly object FileLock = new object();
+        public readonly string CacheFileDir;
+        public readonly string CacheFilePath;
 
-        public static void EnableSerialization(ITokenCache tokenCache)
+        public TokenCacheHelper(string cacheFileDir = @"%HOME%\data")
+        {
+            CacheFileDir = Environment.ExpandEnvironmentVariables(cacheFileDir);
+            CacheFilePath = Path.Combine(CacheFileDir, "msal.cache");
+        }
+
+        public void EnableSerialization(ITokenCache tokenCache)
         {
             tokenCache.SetBeforeAccess(BeforeAccessNotification);
             tokenCache.SetAfterAccess(AfterAccessNotification);
         }
 
-        private static void BeforeAccessNotification(TokenCacheNotificationArgs args)
+        private void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            lock (FileLock)
+            lock (CacheFilePath)
             {
                 if (File.Exists(CacheFilePath))
                 {
@@ -30,11 +35,11 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
             }
         }
 
-        private static void AfterAccessNotification(TokenCacheNotificationArgs args)
+        private void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             if (args.HasStateChanged)
             {
-                lock (FileLock)
+                lock (CacheFilePath)
                 {
                     if (!Directory.Exists(CacheFileDir))
                     {

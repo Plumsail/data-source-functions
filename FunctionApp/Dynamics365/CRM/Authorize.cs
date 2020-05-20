@@ -14,12 +14,12 @@ using Microsoft.Graph.Auth;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Extensions.Options;
-using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
+using Plumsail.DataSource.Dynamics365.CRM.Settings;
 using System.Text;
 using Microsoft.AspNetCore.Http.Extensions;
 using System.Net;
 
-namespace Plumsail.DataSource.Dynamics365.BusinessCentral
+namespace Plumsail.DataSource.Dynamics365.CRM
 {
     public class Authorize
     {
@@ -30,12 +30,12 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
             _settings = settings.Value.AzureApp;
         }
 
-        [FunctionName("D365-BC-Authorize")]
+        [FunctionName("D365-CRM-Authorize")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            var scopes = new string[] { "https://graph.microsoft.com/.default", "offline_access" };
+            var scopes = new string[] { "https://admin.services.crm.dynamics.com/user_impersonation", "offline_access" };
 
             if (req.Method == "POST" && req.Form.ContainsKey("code"))
             {
@@ -49,8 +49,8 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 
                 var cache = new TokenCacheHelper(AzureApp.CacheFileDir);
                 cache.EnableSerialization(app.UserTokenCache);
-
-                _ = await app.AcquireTokenByAuthorizationCode(scopes, code).ExecuteAsync();
+                
+                _ = await app.AcquireTokenByAuthorizationCode(new string[] { $"{_settings.DynamicsUrl}/user_impersonation" }, code).ExecuteAsync();
 
                 return new OkObjectResult("The app is authorized to perform operations on behalf of your account.");
             }
