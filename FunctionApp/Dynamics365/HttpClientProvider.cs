@@ -46,7 +46,7 @@ namespace Plumsail.DataSource.Dynamics365
                 .WithLegacyCacheCompatibility(false)
                 .Build();
 
-            new TokenCacheHelper(AppDomain.CurrentDomain.BaseDirectory).EnableSerialization(_app.AppTokenCache);
+            new TokenCacheHelper("%HOME%\\data\\Dynamics365").EnableSerialization(_app.AppTokenCache);
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
