@@ -1,51 +1,56 @@
 ﻿using Microsoft.Identity.Client;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Plumsail.DataSource
 {
     class TokenCacheHelper
     {
-        public readonly string CacheFileDir;
-        public readonly string CacheFilePath;
+        private readonly string _cacheFileDir;
+        private readonly string _cacheFilePath;
 
-        public TokenCacheHelper(string cacheFileDir = @"%HOME%\data")
+        public TokenCacheHelper(string cacheFileDir)
         {
-            CacheFileDir = Environment.ExpandEnvironmentVariables(cacheFileDir);
-            CacheFilePath = Path.Combine(CacheFileDir, "msal.cache");
+            _cacheFileDir = Environment.ExpandEnvironmentVariables(cacheFileDir);
+            _cacheFilePath = Path.Combine(_cacheFileDir, "msal.cache");
         }
 
         public void EnableSerialization(ITokenCache tokenCache)
         {
-            tokenCache.SetBeforeAccess(BeforeAccessNotification);
-            tokenCache.SetAfterAccess(AfterAccessNotification);
+            tokenCache.SetBeforeAccessAsync(BeforeAccessNotification);
+            tokenCache.SetAfterAccessAsync(AfterAccessNotification);
         }
 
-        private void BeforeAccessNotification(TokenCacheNotificationArgs args)
+        private Task BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            lock (CacheFilePath)
+            lock (_cacheFilePath)
             {
-                if (File.Exists(CacheFilePath))
+                if (File.Exists(_cacheFilePath))
                 {
-                    args.TokenCache.DeserializeMsalV3(File.ReadAllBytes(CacheFilePath));
+                    args.TokenCache.DeserializeMsalV3(File.ReadAllBytes(_cacheFilePath));
                 }
             }
+
+            return Task.CompletedTask;
         }
 
-        private void AfterAccessNotification(TokenCacheNotificationArgs args)
+        private Task AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             if (args.HasStateChanged)
             {
-                lock (CacheFilePath)
+                lock (_cacheFilePath)
                 {
-                    if (!Directory.Exists(CacheFileDir))
+                    if (!Directory.Exists(_cacheFileDir))
                     {
-                        Directory.CreateDirectory(CacheFileDir);
+                        Directory.CreateDirectory(_cacheFileDir);
                     }
 
-                    File.WriteAllBytes(CacheFilePath, args.TokenCache.SerializeMsalV3());
+                    File.WriteAllBytes(_cacheFilePath, args.TokenCache.SerializeMsalV3());
                 }
             }
+
+            return Task.CompletedTask;
         }
     }
 }

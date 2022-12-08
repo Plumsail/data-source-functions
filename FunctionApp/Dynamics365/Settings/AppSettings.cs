@@ -1,4 +1,4 @@
-﻿namespace Plumsail.DataSource.Dynamics365.CRM.Settings 
+﻿namespace Plumsail.DataSource.Dynamics365.Settings 
 {
     public class AppSettings
     {
