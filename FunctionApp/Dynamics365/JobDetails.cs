@@ -45,7 +45,7 @@ public class JobDetails
             if (projectId == null) return new OkObjectResult(new { });
 
             var projectJson = await client.GetStringAsync(
-                $"kms_projects({projectId})?$select=_kms_role1contactid_value,_kms_role1accountid_value,kms_name,kms_address1_line1,kms_address1_line2,kms_address1_line3,kms_address1_city,kms_address1_postalcode");
+                $"kms_projects({projectId})?$select=_kms_role1contactid_value,_kms_role1accountid_value,kms_name,kms_address1_line1,kms_address1_line2,kms_address1_line3,kms_address1_city,kms_address1_postalcode,kms_name");
             var project = JObject.Parse(projectJson);
 
             //load contact and account information from contacts and accounts
