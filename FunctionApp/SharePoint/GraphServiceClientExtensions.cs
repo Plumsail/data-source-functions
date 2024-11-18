@@ -1,33 +1,22 @@
 ﻿using Microsoft.Graph;
+using Microsoft.Graph.Sites.Item.Lists.Item;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Plumsail.DataSource.SharePoint
 {
     internal static class GraphServiceClientExtensions
     {
-        internal static async System.Threading.Tasks.Task<IListRequestBuilder> GetListAsync(this GraphServiceClient graph, string siteUrl, string listName)
+        internal static async System.Threading.Tasks.Task<ListItemRequestBuilder> GetListAsync(this GraphServiceClient graph, string siteUrl, string listName)
         {
             var url = new Uri(siteUrl);
-            var queryOptions = new List<QueryOption>()
+            var site = await graph.Sites[$"{url.Host}:{url.AbsolutePath}"].GetAsync((requestConfiguration) =>
             {
-                new QueryOption("select", "id"),
-                new QueryOption("expand", "lists(select=id,name)")
-            };
-            var site = await graph.Sites.GetByPath(url.AbsolutePath, url.Host)
-                .Request(queryOptions)
-                .GetAsync();
+                requestConfiguration.QueryParameters.Select = ["id"];
+                requestConfiguration.QueryParameters.Expand = ["lists(select=id,name)"];
+            });
 
-            var listsPage = site.Lists;
-            var list = listsPage.FirstOrDefault(list => list.Name == listName);
-            while (list == null && listsPage.NextPageRequest != null)
-            {
-                listsPage = await listsPage.NextPageRequest.GetAsync();
-                list = listsPage.FirstOrDefault(list => list.Name == listName);
-            }
-
+            var list = site.Lists.FirstOrDefault(list => list.Name == listName);
             return list != null
                 ? graph.Sites[site.Id].Lists[list.Id]
                 : null;

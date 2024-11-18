@@ -1,23 +1,14 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
-using System.Net.Http.Headers;
-using Microsoft.Graph.Auth;
-using System.Linq;
-using System.Collections.Generic;
 using Microsoft.Extensions.Options;
+using Microsoft.Graph;
+using Microsoft.Graph.Beta.Models;
 using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
-using System.Text;
-using Microsoft.AspNetCore.Http.Extensions;
-using System.Net;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
@@ -46,14 +37,18 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
                 return new NotFoundResult();
             }
 
-            var vendorsPage = await graph.Financials.Companies[company.Id].Vendors.Request().GetAsync();
-            var vendors = new List<Vendor>(vendorsPage);
-            while (vendorsPage.NextPageRequest != null)
-            {
-                vendorsPage = await vendorsPage.NextPageRequest.GetAsync();
-                vendors.AddRange(vendorsPage);
-            }
 
+            var vendorsPage = await graph.Financials.Companies[company.Id.Value].Vendors.GetAsync();
+
+            var vendors = new List<Vendor>();
+            var pageIterator = PageIterator<Vendor, VendorCollectionResponse>
+                .CreatePageIterator(graph, vendorsPage, vendor =>
+                {
+                    vendors.Add(vendor);
+                    return true;
+                });
+
+            await pageIterator.IterateAsync();
             return new OkObjectResult(vendors);
         }
     }

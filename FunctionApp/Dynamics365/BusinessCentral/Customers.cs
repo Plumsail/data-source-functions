@@ -1,23 +1,14 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
-using System.Net.Http.Headers;
-using Microsoft.Graph.Auth;
-using System.Linq;
-using System.Collections.Generic;
 using Microsoft.Extensions.Options;
+using Microsoft.Graph.Beta.Models;
+using Microsoft.Graph;
 using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
-using System.Text;
-using Microsoft.AspNetCore.Http.Extensions;
-using System.Net;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
@@ -46,14 +37,16 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
                 return new NotFoundResult();
             }
 
-            var customersPage = await graph.Financials.Companies[company.Id].Customers.Request().GetAsync();
-            var customers = new List<Customer>(customersPage);
-            while (customersPage.NextPageRequest != null)
-            {
-                customersPage = await customersPage.NextPageRequest.GetAsync();
-                customers.AddRange(customersPage);
-            }
+            var customersPage = await graph.Financials.Companies[company.Id.Value].Customers.GetAsync();
+            var customers = new List<Customer>();
+            var pageIterator = PageIterator<Customer, CustomerCollectionResponse>
+                .CreatePageIterator(graph, customersPage, customer =>
+                {
+                    customers.Add(customer);
+                    return true;
+                });
 
+            await pageIterator.IterateAsync();
             return new OkObjectResult(customers);
         }
     }

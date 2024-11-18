@@ -1,12 +1,10 @@
-﻿using Microsoft.Extensions.Options;
-using Microsoft.Graph;
+﻿using Azure.Core;
+using Microsoft.Extensions.Options;
+using Microsoft.Graph.Beta;
 using Microsoft.Identity.Client;
 using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
@@ -23,22 +21,29 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
         public async Task<GraphServiceClient> Create()
         {
             var app = ConfidentialClientApplicationBuilder.Create(_azureAppSettings.ClientId)
-                .WithClientSecret(_azureAppSettings.ClientSecret)
-                .WithTenantId(_azureAppSettings.Tenant)
-                .Build();
+                    .WithClientSecret(_azureAppSettings.ClientSecret)
+                    .WithTenantId(_azureAppSettings.Tenant)
+                    .Build();
 
             var cache = new TokenCacheHelper(AzureApp.CacheFileDir);
             cache.EnableSerialization(app.UserTokenCache);
+            var account = await app.GetAccountAsync(cache.GetAccountIdentifier());
+            var result = await app.AcquireTokenSilent(["https://graph.microsoft.com/.default"], account).ExecuteAsync();
 
-            var accounts = await app.GetAccountsAsync();
+            return new GraphServiceClient(new TokenProvider(result.AccessToken, result.ExpiresOn));
+        }
 
-            var authProvider = new DelegateAuthenticationProvider(async (requestMessage) =>
+        internal class TokenProvider(string token, DateTimeOffset expiresOn) : TokenCredential
+        {
+            public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
             {
-                var result = await app.AcquireTokenSilent(new string[] { "https://graph.microsoft.com/.default" }, accounts.FirstOrDefault()).ExecuteAsync();
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("bearer", result.AccessToken);
-            });
+                return GetTokenAsync(requestContext, cancellationToken).Result;
+            }
 
-            return new GraphServiceClient(authProvider);
+            public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
+            {
+                return ValueTask.FromResult(new AccessToken(token, expiresOn));
+            }
         }
     }
 }

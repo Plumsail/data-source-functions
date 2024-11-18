@@ -1,8 +1,6 @@
-﻿using Microsoft.Graph;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.Graph.Beta;
+using Microsoft.Graph.Beta.Models;
 using System.Linq;
-using System.Text;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
@@ -10,8 +8,12 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
     {
         internal static async System.Threading.Tasks.Task<Company> GetCompanyAsync(this GraphServiceClient graph, string companyName)
         {
-            var companies = await graph.Financials.Companies.Request().Select(c => new { c.Id, c.Name, c.DisplayName }).GetAsync();
-            var company = companies.FirstOrDefault(c => c.Name == companyName || c.DisplayName == companyName);
+            var companies = await graph.Financials.Companies.GetAsync(requestConfiguration =>
+            {
+                requestConfiguration.QueryParameters.Select = ["Id", "Name", "DisplayName"];
+            });
+
+            var company = companies.Value?.FirstOrDefault(c => c.Name == companyName || c.DisplayName == companyName);
             return company;
         }
     }

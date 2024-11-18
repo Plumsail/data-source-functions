@@ -53,8 +53,8 @@ namespace Plumsail.DataSource.Dynamics365.CRM
             var cache = new TokenCacheHelper(AzureApp.CacheFileDir);
             cache.EnableSerialization(app.UserTokenCache);
 
-            var accounts = await app.GetAccountsAsync();
-            var result = await app.AcquireTokenSilent(new string[] { $"{_azureAppSettings.DynamicsUrl}/user_impersonation" }, accounts.FirstOrDefault()).ExecuteAsync();
+            var account = await app.GetAccountAsync(cache.GetAccountIdentifier());
+            var result = await app.AcquireTokenSilent(new string[] { $"{_azureAppSettings.DynamicsUrl}/user_impersonation" }, account).ExecuteAsync();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
             return await base.SendAsync(request, cancellationToken);
         }
