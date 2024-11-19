@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
@@ -17,16 +17,16 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
     public class Authorize
     {
         private readonly AzureApp _settings;
+        private readonly ILogger<Authorize> _logger;
 
-        public Authorize(IOptions<AppSettings> settings)
+        public Authorize(IOptions<AppSettings> settings, ILogger<Authorize> logger)
         {
             _settings = settings.Value.AzureApp;
+            _logger = logger;
         }
 
-        [FunctionName("D365-BC-Authorize")]
-        public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
-            ILogger log)
+        [Function("D365-BC-Authorize")]
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
         {
             var scopes = new string[] { "https://graph.microsoft.com/.default", "offline_access" };
 

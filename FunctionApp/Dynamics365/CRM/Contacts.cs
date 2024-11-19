@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
@@ -11,18 +11,18 @@ namespace Plumsail.DataSource.Dynamics365.CRM
     public class Contacts
     {
         private readonly HttpClientProvider _httpClientProvider;
+        private readonly ILogger<Contacts> _logger;
 
-        public Contacts(HttpClientProvider httpClientProvider)
+        public Contacts(HttpClientProvider httpClientProvider, ILogger<Contacts> logger)
         {
             _httpClientProvider = httpClientProvider;
+            _logger = logger;
         }
 
-        [FunctionName("D365-CRM-Contacts")]
-        public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
-            ILogger log)
+        [Function("D365-CRM-Contacts")]
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
         {
-            log.LogInformation("Dynamics365-CRM-Contacts is requested.");
+            _logger.LogInformation("Dynamics365-CRM-Contacts is requested.");
 
             var client = _httpClientProvider.Create();
             var contactsJson = await client.GetStringAsync("contacts");

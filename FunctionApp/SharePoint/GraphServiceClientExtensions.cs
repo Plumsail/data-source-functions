@@ -13,7 +13,7 @@ namespace Plumsail.DataSource.SharePoint
             var site = await graph.Sites[$"{url.Host}:{url.AbsolutePath}"].GetAsync((requestConfiguration) =>
             {
                 requestConfiguration.QueryParameters.Select = ["id"];
-                requestConfiguration.QueryParameters.Expand = ["lists(select=id,name)"];
+                requestConfiguration.QueryParameters.Expand = ["lists($select=id,name)"];
             });
 
             var list = site.Lists.FirstOrDefault(list => list.Name == listName);

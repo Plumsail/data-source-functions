@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Graph.Beta.Models;
 using Microsoft.Graph;
+using Microsoft.Graph.Beta.Models;
 using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,19 +16,19 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
     {
         private readonly Settings.Customers _settings;
         private readonly GraphServiceClientProvider _graphProvider;
+        private readonly ILogger<Customers> _logger;
 
-        public Customers(IOptions<AppSettings> settings, GraphServiceClientProvider graphProvider)
+        public Customers(IOptions<AppSettings> settings, GraphServiceClientProvider graphProvider, ILogger<Customers> logger)
         {
             _settings = settings.Value.Customers;
             _graphProvider = graphProvider;
+            _logger = logger;
         }
 
-        [FunctionName("D365-BC-Customers")]
-        public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
-            ILogger log)
+        [Function("D365-BC-Customers")]
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
         {
-            log.LogInformation("Dynamics365-BusinessCentral-Customers is requested.");
+            _logger.LogInformation("Dynamics365-BusinessCentral-Customers is requested.");
 
             var graph = await _graphProvider.Create();
             var company = await graph.GetCompanyAsync(_settings.Company);
