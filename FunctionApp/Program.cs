@@ -21,7 +21,7 @@ var host = new HostBuilder()
         services.ConfigureFunctionsApplicationInsights();
 
         services.Configure<D365_BC.Settings.AppSettings>(configuration.GetSection("Dynamics365.BusinessCentral"));
-        services.AddTransient<D365_BC.GraphServiceClientProvider>();
+        services.AddTransient<D365_BC.HttpClientProvider>();
 
         services.Configure<D365_CRM.Settings.AppSettings>(configuration.GetSection("Dynamics365.CRM"));
         services.AddTransient<D365_CRM.HttpClientProvider>();

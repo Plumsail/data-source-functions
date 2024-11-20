@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
+using System.Text.Json.Nodes;
 
 namespace Plumsail.DataSource.Dynamics365.CRM
 {
@@ -26,9 +24,9 @@ namespace Plumsail.DataSource.Dynamics365.CRM
 
             var client = _httpClientProvider.Create();
             var contactsJson = await client.GetStringAsync("contacts");
-            var contacts = JObject.Parse(contactsJson);
+            var contacts = JsonValue.Parse(contactsJson);
 
-            return new OkObjectResult(contacts["value"]);
+            return new OkObjectResult(contacts?["value"]);
         }
     }
 }

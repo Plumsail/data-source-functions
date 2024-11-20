@@ -8,6 +8,7 @@ using Microsoft.Graph;
 using Microsoft.Graph.Beta.Models;
 using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
@@ -15,13 +16,13 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
     public class Items
     {
         private readonly Settings.Items _settings;
-        private readonly GraphServiceClientProvider _graphProvider;
+        private readonly HttpClientProvider _httpClientProvider;
         private readonly ILogger<Items> _logger;
 
-        public Items(IOptions<AppSettings> settings, GraphServiceClientProvider graphProvider, ILogger<Items> logger)
+        public Items(IOptions<AppSettings> settings, HttpClientProvider httpClientProvider, ILogger<Items> logger)
         {
             _settings = settings.Value.Items;
-            _graphProvider = graphProvider;
+            _httpClientProvider = httpClientProvider;
             _logger = logger;
         }
 
@@ -29,26 +30,18 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req)
         {
-            _logger.LogInformation("Dynamics365-BusinessCentral-Vendors is requested.");
+            _logger.LogInformation("Dynamics365-BusinessCentral-Items is requested.");
 
-            var graph = await _graphProvider.Create();
-            var company = await graph.GetCompanyAsync(_settings.Company);
-            if (company == null)
+            var client = _httpClientProvider.Create();
+            var companyId = await client.GetCompanyIdAsync(_settings.Company);
+            if (companyId == null)
             {
                 return new NotFoundResult();
             }
 
-            var itemsPage = await graph.Financials.Companies[company.Id.Value].Items.GetAsync();
-            var items = new List<Item>();
-            var pageIterator = PageIterator<Item, ItemCollectionResponse>
-                .CreatePageIterator(graph, itemsPage, item =>
-                {
-                    items.Add(item);
-                    return true;
-                });
-
-            await pageIterator.IterateAsync();
-            return new OkObjectResult(items);
+            var itemsJson = await client.GetStringAsync($"companies({companyId})/items");
+            var items = JsonValue.Parse(itemsJson);
+            return new OkObjectResult(items?["value"]);
         }
     }
 }

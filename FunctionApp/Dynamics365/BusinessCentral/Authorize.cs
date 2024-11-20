@@ -28,7 +28,7 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
         [Function("D365-BC-Authorize")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
         {
-            var scopes = new string[] { "https://graph.microsoft.com/.default", "offline_access" };
+            var scopes = new string[] { "https://api.businesscentral.dynamics.com/.default", "offline_access" };
 
             if (req.Method == "POST" && req.Form.ContainsKey("code"))
             {

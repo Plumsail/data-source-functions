@@ -7,7 +7,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Graph.Beta.Models;
 using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
+using Plumsail.DataSource.Dynamics365.CRM;
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
@@ -15,13 +17,13 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
     public class Vendors
     {
         private readonly Settings.Vendors _settings;
-        private readonly GraphServiceClientProvider _graphProvider;
+        private readonly HttpClientProvider _httpClientProvider;
         private readonly ILogger<Vendors> _logger;
 
-        public Vendors(IOptions<AppSettings> settings, GraphServiceClientProvider graphProvider, ILogger<Vendors> logger)
+        public Vendors(IOptions<AppSettings> settings, HttpClientProvider httpClientProvider, ILogger<Vendors> logger)
         {
             _settings = settings.Value.Vendors;
-            _graphProvider = graphProvider;
+            _httpClientProvider = httpClientProvider;
             _logger = logger;
         }
 
@@ -30,26 +32,16 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
         {
             _logger.LogInformation("Dynamics365-BusinessCentral-Vendors is requested.");
 
-            var graph = await _graphProvider.Create();
-            var company = await graph.GetCompanyAsync(_settings.Company);
-            if (company == null)
+            var client = _httpClientProvider.Create();
+            var companyId = await client.GetCompanyIdAsync(_settings.Company);
+            if (companyId == null)
             {
                 return new NotFoundResult();
             }
 
-
-            var vendorsPage = await graph.Financials.Companies[company.Id.Value].Vendors.GetAsync();
-
-            var vendors = new List<Vendor>();
-            var pageIterator = PageIterator<Vendor, VendorCollectionResponse>
-                .CreatePageIterator(graph, vendorsPage, vendor =>
-                {
-                    vendors.Add(vendor);
-                    return true;
-                });
-
-            await pageIterator.IterateAsync();
-            return new OkObjectResult(vendors);
+            var vendorsJson = await client.GetStringAsync($"companies({companyId})/vendors");
+            var vendors = JsonValue.Parse(vendorsJson);
+            return new OkObjectResult(vendors?["value"]);
         }
     }
 }
