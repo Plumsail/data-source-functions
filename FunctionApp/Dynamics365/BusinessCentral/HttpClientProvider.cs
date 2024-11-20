@@ -1,16 +1,18 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Azure.Core;
+using Azure.Identity;
+using Microsoft.Extensions.Options;
+using Microsoft.Graph.Beta;
 using Microsoft.Identity.Client;
-using Plumsail.DataSource.Dynamics365.CRM.Settings;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
+using Plumsail.DataSource.Dynamics365.CRM;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Plumsail.DataSource.Dynamics365.CRM
+namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
     public class HttpClientProvider
     {
@@ -23,11 +25,13 @@ namespace Plumsail.DataSource.Dynamics365.CRM
 
         public HttpClient Create()
         {
-            var client = new HttpClient(new OAuthMessageHandler(_azureAppSettings, new HttpClientHandler()));
-            client.BaseAddress = new Uri($"{_azureAppSettings.DynamicsUrl}/api/data/v9.1/");
+            // for debugging requests
+            //var debugHandler = new DebugRequestHandler(new DebugResponseHandler());
+            //var client = new HttpClient(new OAuthMessageHandler(_azureAppSettings, debugHandler));
+
+            var client = new HttpClient(new OAuthMessageHandler(_azureAppSettings));
+            client.BaseAddress = new Uri($"https://api.businesscentral.dynamics.com/v2.0/{_azureAppSettings.InstanceId}/Production/api/v2.0/");
             client.Timeout = new TimeSpan(0, 2, 0);
-            client.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
-            client.DefaultRequestHeaders.Add("OData-Version", "4.0");
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             return client;
@@ -38,7 +42,7 @@ namespace Plumsail.DataSource.Dynamics365.CRM
     {
         private readonly AzureApp _azureAppSettings;
 
-        public OAuthMessageHandler(AzureApp azureAppSettings, HttpMessageHandler innerHandler) : base(innerHandler)
+        public OAuthMessageHandler(AzureApp azureAppSettings, HttpMessageHandler? innerHandler = null) : base(innerHandler ?? new HttpClientHandler())
         {
             _azureAppSettings = azureAppSettings;
         }
@@ -54,7 +58,7 @@ namespace Plumsail.DataSource.Dynamics365.CRM
             cache.EnableSerialization(app.UserTokenCache);
 
             var account = await app.GetAccountAsync(cache.GetAccountIdentifier());
-            var result = await app.AcquireTokenSilent(new string[] { $"{_azureAppSettings.DynamicsUrl}/user_impersonation" }, account).ExecuteAsync();
+            var result = await app.AcquireTokenSilent(["https://api.businesscentral.dynamics.com/.default"], account).ExecuteAsync();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
             return await base.SendAsync(request, cancellationToken);
         }

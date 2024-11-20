@@ -10,5 +10,6 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral.Settings
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
         public string Tenant { get; set; }
+        public string InstanceId { get; set; }
     }
 }

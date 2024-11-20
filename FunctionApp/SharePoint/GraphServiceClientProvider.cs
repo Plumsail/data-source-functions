@@ -1,14 +1,8 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Azure.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.Graph;
-using Microsoft.Graph.Auth;
 using Microsoft.Identity.Client;
 using Plumsail.DataSource.SharePoint.Settings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.SharePoint
 {
@@ -23,13 +17,14 @@ namespace Plumsail.DataSource.SharePoint
 
         public GraphServiceClient Create()
         {
-            var confidentialClientApplication = ConfidentialClientApplicationBuilder.Create(_azureAppSettings.ClientId)
-                .WithClientSecret(_azureAppSettings.ClientSecret)
-                .WithTenantId(_azureAppSettings.Tenant)
-                .Build();
+            // using Azure.Identity;
+            var options = new ClientSecretCredentialOptions
+            {
+                AuthorityHost = AzureAuthorityHosts.AzurePublicCloud,
+            };
 
-            var authProvider = new ClientCredentialProvider(confidentialClientApplication);
-            return new GraphServiceClient(authProvider);
+            var clientSecretCredential = new ClientSecretCredential(_azureAppSettings.Tenant, _azureAppSettings.ClientId, _azureAppSettings.ClientSecret, options);
+            return new GraphServiceClient(clientSecretCredential);
         }
     }
 }

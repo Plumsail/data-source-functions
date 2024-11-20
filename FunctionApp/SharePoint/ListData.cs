@@ -1,19 +1,14 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
-using System.Net.Http.Headers;
-using Microsoft.Graph.Auth;
-using System.Linq;
-using System.Collections.Generic;
 using Microsoft.Extensions.Options;
+using Microsoft.Graph;
+using Microsoft.Graph.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Plumsail.DataSource.SharePoint
 {
@@ -21,40 +16,39 @@ namespace Plumsail.DataSource.SharePoint
     {
         private readonly Settings.ListData _settings;
         private readonly GraphServiceClientProvider _graphProvider;
+        private readonly ILogger<ListData> _logger;
 
-        public ListData(IOptions<Settings.AppSettings> settings, GraphServiceClientProvider graphProvider)
+        public ListData(IOptions<Settings.AppSettings> settings, GraphServiceClientProvider graphProvider, ILogger<ListData> logger)
         {
+            _logger = logger;
             _settings = settings.Value.ListData;
             _graphProvider = graphProvider;
         }
 
-        [FunctionName("SharePoint-ListData")]
+        [Function("SharePoint-ListData")]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
-            ILogger log)
+            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
         {
-            log.LogInformation("ListData is requested.");
+            _logger.LogInformation("ListData is requested.");
 
             var graph = _graphProvider.Create();
             var list = await graph.GetListAsync(_settings.SiteUrl, _settings.ListName);
-
-            var queryOptions = new List<QueryOption>()
+            var itemsPage = await list.Items.GetAsync(requestConfiguration =>
             {
-                //new QueryOption("filter", "fields/Title eq 'item 1'"),
-                new QueryOption("select", "id"),
-                new QueryOption("expand", "fields(select=Title,Author)")
-            };
-            var itemsPage = await list.Items
-                .Request(queryOptions)
-                .GetAsync();
-            var items = new List<ListItem>(itemsPage);
+                //requestConfiguration.QueryParameters.Filter = "fields/Title eq 'item 1'";
+                requestConfiguration.QueryParameters.Select = ["id"];
+                requestConfiguration.QueryParameters.Expand = ["fields($select=Title,Author)"];
+            });
 
-            while (itemsPage.NextPageRequest != null)
-            {
-                itemsPage = await itemsPage.NextPageRequest.GetAsync();
-                items.AddRange(itemsPage);
-            }
+            var items = new List<ListItem>();
+            var pageIterator = PageIterator<ListItem, ListItemCollectionResponse>
+                .CreatePageIterator(graph, itemsPage, item =>
+                {
+                    items.Add(item);
+                    return true;
+                });
 
+            await pageIterator.IterateAsync();
             return new OkObjectResult(items);
         }
     }

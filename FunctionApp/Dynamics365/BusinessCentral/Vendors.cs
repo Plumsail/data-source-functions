@@ -1,60 +1,47 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
-using System.Net.Http.Headers;
-using Microsoft.Graph.Auth;
-using System.Linq;
-using System.Collections.Generic;
 using Microsoft.Extensions.Options;
+using Microsoft.Graph;
+using Microsoft.Graph.Beta.Models;
 using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
-using System.Text;
-using Microsoft.AspNetCore.Http.Extensions;
-using System.Net;
+using Plumsail.DataSource.Dynamics365.CRM;
+using System.Collections.Generic;
+using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
     public class Vendors
     {
         private readonly Settings.Vendors _settings;
-        private readonly GraphServiceClientProvider _graphProvider;
+        private readonly HttpClientProvider _httpClientProvider;
+        private readonly ILogger<Vendors> _logger;
 
-        public Vendors(IOptions<AppSettings> settings, GraphServiceClientProvider graphProvider)
+        public Vendors(IOptions<AppSettings> settings, HttpClientProvider httpClientProvider, ILogger<Vendors> logger)
         {
             _settings = settings.Value.Vendors;
-            _graphProvider = graphProvider;
+            _httpClientProvider = httpClientProvider;
+            _logger = logger;
         }
 
-        [FunctionName("D365-BC-Vendors")]
-        public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
-            ILogger log)
+        [Function("D365-BC-Vendors")]
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
         {
-            log.LogInformation("Dynamics365-BusinessCentral-Vendors is requested.");
+            _logger.LogInformation("Dynamics365-BusinessCentral-Vendors is requested.");
 
-            var graph = await _graphProvider.Create();
-            var company = await graph.GetCompanyAsync(_settings.Company);
-            if (company == null)
+            var client = _httpClientProvider.Create();
+            var companyId = await client.GetCompanyIdAsync(_settings.Company);
+            if (companyId == null)
             {
                 return new NotFoundResult();
             }
 
-            var vendorsPage = await graph.Financials.Companies[company.Id].Vendors.Request().GetAsync();
-            var vendors = new List<Vendor>(vendorsPage);
-            while (vendorsPage.NextPageRequest != null)
-            {
-                vendorsPage = await vendorsPage.NextPageRequest.GetAsync();
-                vendors.AddRange(vendorsPage);
-            }
-
-            return new OkObjectResult(vendors);
+            var vendorsJson = await client.GetStringAsync($"companies({companyId})/vendors");
+            var vendors = JsonValue.Parse(vendorsJson);
+            return new OkObjectResult(vendors?["value"]);
         }
     }
 }

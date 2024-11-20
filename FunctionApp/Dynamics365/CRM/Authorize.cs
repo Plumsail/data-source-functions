@@ -1,41 +1,34 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
-using System.Net.Http.Headers;
-using Microsoft.Graph.Auth;
-using System.Linq;
-using System.Collections.Generic;
-using Microsoft.Extensions.Options;
-using Plumsail.DataSource.Dynamics365.CRM.Settings;
-using System.Text;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.Identity.Client;
+using Plumsail.DataSource.Dynamics365.CRM.Settings;
+using System.Linq;
 using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.Dynamics365.CRM
 {
     public class Authorize
     {
         private readonly AzureApp _settings;
+        private readonly ILogger<Authorize> _logger;
 
-        public Authorize(IOptions<AppSettings> settings)
+        public Authorize(IOptions<AppSettings> settings, ILogger<Authorize> logger)
         {
             _settings = settings.Value.AzureApp;
+            _logger = logger;
         }
 
-        [FunctionName("D365-CRM-Authorize")]
-        public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
-            ILogger log)
+        [Function("D365-CRM-Authorize")]
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
         {
-            var scopes = new string[] { "https://admin.services.crm.dynamics.com/user_impersonation", "offline_access" };
+            var scopes = new string[] { $"https://admin.services.crm.dynamics.com/user_impersonation", "offline_access" };
 
             if (req.Method == "POST" && req.Form.ContainsKey("code"))
             {
@@ -50,7 +43,7 @@ namespace Plumsail.DataSource.Dynamics365.CRM
                 var cache = new TokenCacheHelper(AzureApp.CacheFileDir);
                 cache.EnableSerialization(app.UserTokenCache);
                 
-                _ = await app.AcquireTokenByAuthorizationCode(new string[] { $"{_settings.DynamicsUrl}/user_impersonation" }, code).ExecuteAsync();
+                _ = await app.AcquireTokenByAuthorizationCode(["https://admin.services.crm.dynamics.com/user_impersonation"], code).ExecuteAsync();
 
                 return new OkObjectResult("The app is authorized to perform operations on behalf of your account.");
             }

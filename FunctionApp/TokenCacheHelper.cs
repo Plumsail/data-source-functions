@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml.Linq;
 
 namespace Plumsail.DataSource
 {
@@ -11,11 +12,18 @@ namespace Plumsail.DataSource
     {
         public readonly string CacheFileDir;
         public readonly string CacheFilePath;
+        public readonly string AccountFilePath;
 
         public TokenCacheHelper(string cacheFileDir = @"%HOME%\data")
         {
             CacheFileDir = Environment.ExpandEnvironmentVariables(cacheFileDir);
             CacheFilePath = Path.Combine(CacheFileDir, "msal.cache");
+            AccountFilePath = Path.Combine(CacheFileDir, "msal-account.cache");
+        }
+
+        public string GetAccountIdentifier()
+        {
+            return File.ReadAllText(AccountFilePath);
         }
 
         public void EnableSerialization(ITokenCache tokenCache)
@@ -46,7 +54,9 @@ namespace Plumsail.DataSource
                         Directory.CreateDirectory(CacheFileDir);
                     }
 
+                    
                     File.WriteAllBytes(CacheFilePath, args.TokenCache.SerializeMsalV3());
+                    File.WriteAllText(AccountFilePath, args.Account.HomeAccountId.Identifier);
                 }
             }
         }
