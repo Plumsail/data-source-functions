@@ -1,16 +1,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Graph;
-using Microsoft.Graph.Beta.Models;
 using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
-using Plumsail.DataSource.Dynamics365.CRM;
-using System.Collections.Generic;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
@@ -28,20 +22,50 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
         }
 
         [Function("D365-BC-Vendors")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = "bc/vendors/{id?}")] HttpRequest req, Guid? id)
         {
-            _logger.LogInformation("Dynamics365-BusinessCentral-Vendors is requested.");
+            _logger.LogInformation("D365-BC-Vendors is requested.");
 
-            var client = _httpClientProvider.Create();
-            var companyId = await client.GetCompanyIdAsync(_settings.Company);
-            if (companyId == null)
+            try
             {
-                return new NotFoundResult();
-            }
+                var client = _httpClientProvider.Create();
+                var companyId = await client.GetCompanyIdAsync(_settings.Company);
+                if (companyId == null)
+                {
+                    return new NotFoundResult();
+                }
 
-            var vendorsJson = await client.GetStringAsync($"companies({companyId})/vendors");
-            var vendors = JsonValue.Parse(vendorsJson);
-            return new OkObjectResult(vendors?["value"]);
+                if (!id.HasValue)
+                {
+                    var vendorsJson = await client.GetStringAsync($"companies({companyId})/vendors");
+                    var vendors = JsonValue.Parse(vendorsJson);
+                    return new OkObjectResult(vendors?["value"]);
+                }
+
+                var vendorResponse = await client.GetAsync($"companies({companyId})/vendors({id})");
+                if (!vendorResponse.IsSuccessStatusCode)
+                {
+                    if (vendorResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        return new NotFoundResult();
+                    }
+
+                    // throws Exception
+                    vendorResponse.EnsureSuccessStatusCode();
+                }
+
+                var vendorJson = await vendorResponse.Content.ReadAsStringAsync();
+                return new ContentResult()
+                {
+                    Content = vendorJson,
+                    ContentType = "application/json"
+                };
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "An error has occured while processing D365-BC-Vendors request.");
+                return new StatusCodeResult(ex.StatusCode.HasValue ? (int)ex.StatusCode.Value : StatusCodes.Status500InternalServerError);
+            }
         }
     }
 }
