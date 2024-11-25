@@ -42,7 +42,7 @@ Dynamics365.CRM:AzureApp:DynamicsUrl | The URL of your Dynamics CRM, ex.: https:
 ### Dynamics 365 Business Central
 
 1. Open [Microsoft Entra admin center](https://entra.microsoft.com/)
-2. Register an app](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app?tabs=client-secret#register-an-application) and add delegated permissions to Dynamics 365 Business Central: **Dynamics 365 Business Central** → **Financials.ReadWrite.All**.
+2. [Register an app](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app?tabs=client-secret#register-an-application) and add delegated permissions to Dynamics 365 Business Central: **Dynamics 365 Business Central** → **Financials.ReadWrite.All**.
 3. Fork this repository.
 4. Sign in to the [Azure portal](https://portal.azure.com/), [create a function app](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-function-app-portal), and deploy your forked repository.
 5. Copy the URL of **D365-BC-Authorize** function and add it to **Authentication** → **Web** → **Redirect URIs** of the Entra ID app
