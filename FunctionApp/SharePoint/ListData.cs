@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using Microsoft.Graph.Models.ODataErrors;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -27,29 +28,47 @@ namespace Plumsail.DataSource.SharePoint
 
         [Function("SharePoint-ListData")]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "sp/items/{id?}")] HttpRequest req, int? id)
         {
-            _logger.LogInformation("ListData is requested.");
+            _logger.LogInformation("SharePoint-ListData is requested.");
 
             var graph = _graphProvider.Create();
             var list = await graph.GetListAsync(_settings.SiteUrl, _settings.ListName);
-            var itemsPage = await list.Items.GetAsync(requestConfiguration =>
+            if (list == null)
             {
-                //requestConfiguration.QueryParameters.Filter = "fields/Title eq 'item 1'";
-                requestConfiguration.QueryParameters.Select = ["id"];
-                requestConfiguration.QueryParameters.Expand = ["fields($select=Title,Author)"];
-            });
+                return new NotFoundResult();
+            }
 
-            var items = new List<ListItem>();
-            var pageIterator = PageIterator<ListItem, ListItemCollectionResponse>
-                .CreatePageIterator(graph, itemsPage, item =>
+            if (!id.HasValue)
+            {
+                var itemsPage = await list.Items.GetAsync(requestConfiguration =>
                 {
-                    items.Add(item);
-                    return true;
+                    //requestConfiguration.QueryParameters.Filter = "fields/Title eq 'item 1'";
+                    requestConfiguration.QueryParameters.Select = ["id"];
+                    requestConfiguration.QueryParameters.Expand = ["fields($select=Title,Author)"];
                 });
 
-            await pageIterator.IterateAsync();
-            return new OkObjectResult(items);
+                var items = new List<ListItem>();
+                var pageIterator = PageIterator<ListItem, ListItemCollectionResponse>
+                    .CreatePageIterator(graph, itemsPage, item =>
+                    {
+                        items.Add(item);
+                        return true;
+                    });
+
+                await pageIterator.IterateAsync();
+                return new OkObjectResult(items);
+            }
+
+            try 
+            {
+                var item = await list.Items[id.ToString()].GetAsync();
+                return new OkObjectResult(item?.Fields?.AdditionalData);
+            }
+            catch (ODataError error) when (error.ResponseStatusCode.Equals(404))
+            {
+                return new NotFoundResult();
+            }
         }
     }
 }
