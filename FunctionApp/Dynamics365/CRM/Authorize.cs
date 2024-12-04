@@ -26,7 +26,7 @@ namespace Plumsail.DataSource.Dynamics365.CRM
         }
 
         [Function("D365-CRM-Authorize")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = "crm/authorize")] HttpRequest req)
         {
             var scopes = new string[] { $"https://admin.services.crm.dynamics.com/user_impersonation", "offline_access" };
 
