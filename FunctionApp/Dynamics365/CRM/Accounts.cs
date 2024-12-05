@@ -18,15 +18,45 @@ namespace Plumsail.DataSource.Dynamics365.CRM
         }
 
         [Function("D365-CRM-Accounts")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = "crm/accounts/{id?}")] HttpRequest req, Guid? id)
         {
             _logger.LogInformation("Dynamics365-CRM-Accounts is requested.");
 
-            var client = _httpClientProvider.Create();
-            var accountsJson = await client.GetStringAsync("accounts");
-            var accounts = JsonValue.Parse(accountsJson);
+            try
+            {
+                var client = _httpClientProvider.Create();
 
-            return new OkObjectResult(accounts?["value"]);
+                if (!id.HasValue)
+                {
+                    var accountsJson = await client.GetStringAsync("accounts?$select=accountid,name");
+                    var accounts = JsonValue.Parse(accountsJson);
+                    return new OkObjectResult(accounts?["value"]);
+                }
+
+                var accountResponse = await client.GetAsync($"accounts({id})");
+                if (!accountResponse.IsSuccessStatusCode)
+                {
+                    if (accountResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        return new NotFoundResult();
+                    }
+
+                    // throws Exception
+                    accountResponse.EnsureSuccessStatusCode();
+                }
+
+                var accountJson = await accountResponse.Content.ReadAsStringAsync();
+                return new ContentResult()
+                {
+                    Content = accountJson,
+                    ContentType = "application/json"
+                };
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "An error has occured while processing Dynamics365-CRM-Accounts request.");
+                return new StatusCodeResult(ex.StatusCode.HasValue ? (int)ex.StatusCode.Value : StatusCodes.Status500InternalServerError);
+            }
         }
     }
 }

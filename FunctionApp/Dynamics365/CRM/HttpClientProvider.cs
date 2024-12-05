@@ -24,7 +24,7 @@ namespace Plumsail.DataSource.Dynamics365.CRM
         public HttpClient Create()
         {
             var client = new HttpClient(new OAuthMessageHandler(_azureAppSettings, new HttpClientHandler()));
-            client.BaseAddress = new Uri($"{_azureAppSettings.DynamicsUrl}/api/data/v9.1/");
+            client.BaseAddress = new Uri($"{_azureAppSettings.DynamicsUrl}/api/data/v9.2/");
             client.Timeout = new TimeSpan(0, 2, 0);
             client.DefaultRequestHeaders.Add("OData-MaxVersion", "4.0");
             client.DefaultRequestHeaders.Add("OData-Version", "4.0");
