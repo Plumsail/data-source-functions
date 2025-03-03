@@ -2,7 +2,7 @@
 {
     public class AzureApp
     {
-        public const string CacheFileDir = @"%HOME%\data\Dynamics365.BusinessCentral";
+        public static readonly string CacheFileDir = Path.Combine(Environment.GetEnvironmentVariable("HOME"), "data", "Dynamics365.BusinessCentral");
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
         public string Tenant { get; set; }
