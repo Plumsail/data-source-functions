@@ -6,25 +6,16 @@ using System.Text.Json.Nodes;
 
 namespace Plumsail.DataSource.Dynamics365.CRM
 {
-    public class Accounts
+    public class Accounts(HttpClientProvider httpClientProvider, ILogger<Accounts> logger)
     {
-        private readonly HttpClientProvider _httpClientProvider;
-        private readonly ILogger<Accounts> _logger;
-
-        public Accounts(HttpClientProvider httpClientProvider, ILogger<Accounts> logger)
-        {
-            _httpClientProvider = httpClientProvider;
-            _logger = logger;
-        }
-
         [Function("D365-CRM-Accounts")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = "crm/accounts/{id?}")] HttpRequest req, Guid? id)
         {
-            _logger.LogInformation("Dynamics365-CRM-Accounts is requested.");
+            logger.LogInformation("Dynamics365-CRM-Accounts is requested.");
 
             try
             {
-                var client = _httpClientProvider.Create();
+                var client = httpClientProvider.Create();
 
                 if (!id.HasValue)
                 {
@@ -54,7 +45,7 @@ namespace Plumsail.DataSource.Dynamics365.CRM
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "An error has occured while processing Dynamics365-CRM-Accounts request.");
+                logger.LogError(ex, "An error has occured while processing Dynamics365-CRM-Accounts request.");
                 return new StatusCodeResult(ex.StatusCode.HasValue ? (int)ex.StatusCode.Value : StatusCodes.Status500InternalServerError);
             }
         }

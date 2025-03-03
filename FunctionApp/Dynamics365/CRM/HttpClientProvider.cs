@@ -1,25 +1,13 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
 using Plumsail.DataSource.Dynamics365.CRM.Settings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.Dynamics365.CRM
 {
-    public class HttpClientProvider
+    public class HttpClientProvider(IOptions<AppSettings> settings)
     {
-        private readonly AzureApp _azureAppSettings;
-
-        public HttpClientProvider(IOptions<AppSettings> settings)
-        {
-            _azureAppSettings = settings.Value.AzureApp;
-        }
+        private readonly AzureApp _azureAppSettings = settings.Value.AzureApp;
 
         public HttpClient Create()
         {
@@ -34,27 +22,21 @@ namespace Plumsail.DataSource.Dynamics365.CRM
         }
     }
 
-    class OAuthMessageHandler : DelegatingHandler
+    class OAuthMessageHandler(AzureApp azureAppSettings, HttpMessageHandler innerHandler)
+        : DelegatingHandler(innerHandler)
     {
-        private readonly AzureApp _azureAppSettings;
-
-        public OAuthMessageHandler(AzureApp azureAppSettings, HttpMessageHandler innerHandler) : base(innerHandler)
-        {
-            _azureAppSettings = azureAppSettings;
-        }
-
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var app = ConfidentialClientApplicationBuilder.Create(_azureAppSettings.ClientId)
-               .WithClientSecret(_azureAppSettings.ClientSecret)
-               .WithTenantId(_azureAppSettings.Tenant)
+            var app = ConfidentialClientApplicationBuilder.Create(azureAppSettings.ClientId)
+               .WithClientSecret(azureAppSettings.ClientSecret)
+               .WithTenantId(azureAppSettings.Tenant)
                .Build();
 
             var cache = new TokenCacheHelper(AzureApp.CacheFileDir);
             cache.EnableSerialization(app.UserTokenCache);
 
             var account = await app.GetAccountAsync(cache.GetAccountIdentifier());
-            var result = await app.AcquireTokenSilent(new string[] { $"{_azureAppSettings.DynamicsUrl}/user_impersonation" }, account).ExecuteAsync();
+            var result = await app.AcquireTokenSilent([$"{azureAppSettings.DynamicsUrl}/user_impersonation"], account).ExecuteAsync(cancellationToken);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
             return await base.SendAsync(request, cancellationToken);
         }

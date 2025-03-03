@@ -1,4 +1,3 @@
-using Grpc.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -7,25 +6,16 @@ using System.Text.Json.Nodes;
 
 namespace Plumsail.DataSource.Dynamics365.CRM
 {
-    public class Contacts
+    public class Contacts(HttpClientProvider httpClientProvider, ILogger<Contacts> logger)
     {
-        private readonly HttpClientProvider _httpClientProvider;
-        private readonly ILogger<Contacts> _logger;
-
-        public Contacts(HttpClientProvider httpClientProvider, ILogger<Contacts> logger)
-        {
-            _httpClientProvider = httpClientProvider;
-            _logger = logger;
-        }
-
         [Function("D365-CRM-Contacts")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = "crm/contacts/{id?}")] HttpRequest req, Guid? id)
         {
-            _logger.LogInformation("Dynamics365-CRM-Contacts is requested.");
+            logger.LogInformation("Dynamics365-CRM-Contacts is requested.");
 
             try
             {
-                var client = _httpClientProvider.Create();
+                var client = httpClientProvider.Create();
 
                 if (!id.HasValue)
                 {
@@ -55,7 +45,7 @@ namespace Plumsail.DataSource.Dynamics365.CRM
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "An error has occured while processing Dynamics365-CRM-Contacts request.");
+                logger.LogError(ex, "An error has occured while processing Dynamics365-CRM-Contacts request.");
                 return new StatusCodeResult(ex.StatusCode.HasValue ? (int)ex.StatusCode.Value : StatusCodes.Status500InternalServerError);
             }
         }

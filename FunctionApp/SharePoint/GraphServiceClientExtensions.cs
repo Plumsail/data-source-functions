@@ -1,7 +1,5 @@
 ﻿using Microsoft.Graph;
 using Microsoft.Graph.Sites.Item.Lists.Item;
-using System;
-using System.Linq;
 
 namespace Plumsail.DataSource.SharePoint
 {

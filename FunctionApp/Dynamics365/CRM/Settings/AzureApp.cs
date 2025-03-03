@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Plumsail.DataSource.Dynamics365.CRM.Settings
+﻿namespace Plumsail.DataSource.Dynamics365.CRM.Settings
 {
     public class AzureApp
     {

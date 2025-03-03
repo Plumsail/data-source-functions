@@ -1,41 +1,26 @@
-using Grpc.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Graph;
-using Microsoft.Graph.Beta.Models;
 using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
-using System.Collections.Generic;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
-    public class Items
+    public class Items(IOptions<AppSettings> settings, HttpClientProvider httpClientProvider, ILogger<Items> logger)
     {
-        private readonly Settings.Items _settings;
-        private readonly HttpClientProvider _httpClientProvider;
-        private readonly ILogger<Items> _logger;
-
-        public Items(IOptions<AppSettings> settings, HttpClientProvider httpClientProvider, ILogger<Items> logger)
-        {
-            _settings = settings.Value.Items;
-            _httpClientProvider = httpClientProvider;
-            _logger = logger;
-        }
+        private readonly Settings.Items _settings = settings.Value.Items;
 
         [Function("D365-BC-Items")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "bc/items/{id?}")] HttpRequest req, Guid? id)
         {
-            _logger.LogInformation("D365-BC-Items is requested.");
+            logger.LogInformation("D365-BC-Items is requested.");
 
             try
             {
-                var client = _httpClientProvider.Create();
+                var client = httpClientProvider.Create();
                 var companyId = await client.GetCompanyIdAsync(_settings.Company);
                 if (companyId == null)
                 {
@@ -70,7 +55,7 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "An error has occured while processing D365-BC-Items request.");
+                logger.LogError(ex, "An error has occured while processing D365-BC-Items request.");
                 return new StatusCodeResult(ex.StatusCode.HasValue ? (int)ex.StatusCode.Value : StatusCodes.Status500InternalServerError);
             }
         }
