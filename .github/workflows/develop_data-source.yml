@@ -1,17 +1,17 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy dotnet core project to Azure Function App - data-source-functions2
+name: Build and deploy dotnet core project to Azure Function App - data-source
 
 on:
   push:
     branches:
-      - master
+      - develop
   workflow_dispatch:
 
 env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '8.0.x' # set this to the dotnet version to use
+  DOTNET_VERSION: '9.0' # set this to the dotnet version to use
 
 jobs:
   build-and-deploy:
@@ -39,15 +39,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_11E5E6EA66854BD5A0AAD75B04881A86 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6BDC0F822CC1439E96F872F392B50160 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9BA038F307224C6B8804F518ADFE7315 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_B18915BB02FD406688338A42A6A2204F }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_EF4CE2AF39704004BAF196AD0896D59E }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_60CAA2F3D7864284A3CA4D413687EA4B }}
 
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
         id: fa
         with:
-          app-name: 'data-source-functions2'
+          app-name: 'data-source'
           slot-name: 'Production'
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
           

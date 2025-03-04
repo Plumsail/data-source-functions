@@ -1,10 +1,4 @@
 ﻿using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using System.Xml.Linq;
 
 namespace Plumsail.DataSource
 {
@@ -14,9 +8,9 @@ namespace Plumsail.DataSource
         public readonly string CacheFilePath;
         public readonly string AccountFilePath;
 
-        public TokenCacheHelper(string cacheFileDir = @"%HOME%\data")
+        public TokenCacheHelper(string cacheFileDir)
         {
-            CacheFileDir = Environment.ExpandEnvironmentVariables(cacheFileDir);
+            CacheFileDir = Path.GetFullPath(Environment.ExpandEnvironmentVariables(cacheFileDir));
             CacheFilePath = Path.Combine(CacheFileDir, "msal.cache");
             AccountFilePath = Path.Combine(CacheFileDir, "msal-account.cache");
         }
