@@ -54,7 +54,7 @@ Dynamics365.BusinessCentral__AzureApp__ClientId | The Application (client) ID of
 Dynamics365.BusinessCentral__AzureApp__ClientSecret | The Client secret of the Entra ID app
 Dynamics365.BusinessCentral__AzureApp__Tenant | Your Microsoft 365 tenant, ex.: contoso.onmicrosoft.com
 Dynamics365.BusinessCentral__AzureApp__InstanceId | Your Business Central ID: https://businesscentral.dynamics.com/{instanceId}/?referrer=office
-Dynamics365.BusinessCentral__Customers:Company | The name of the source company for D365-BC-Customers function
+Dynamics365.BusinessCentral__Customers__Company | The name of the source company for D365-BC-Customers function
 Dynamics365.BusinessCentral__Vendors__Company | The name of the source company for D365-BC-Vendors function
 Dynamics365.BusinessCentral__Items__Company | The name of the source company for D365-BC-Items function
 
