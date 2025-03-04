@@ -15,11 +15,11 @@ This repository contains Azure Functions for retrieving data from a SharePoint l
 
 Name | Description
 --- | --- 
-SharePoint:AzureApp:ClientId | The Application (client) ID of the Entra ID app
-SharePoint:AzureApp:ClientSecret | The Client secret of the Entra ID app
-SharePoint:AzureApp:Tenant | Your Microsoft 365 tenant, ex.: contoso.onmicrosoft.com
-SharePoint:ListData:SiteUrl | The absolute URL of the source site, ex: https://contoso.sharepoint.com/sites/mysite
-SharePoint:ListData:ListName | The name of the source list
+SharePoint__AzureApp__ClientId | The Application (client) ID of the Entra ID app
+SharePoint__AzureApp__ClientSecret | The Client secret of the Entra ID app
+SharePoint__AzureApp__Tenant | Your Microsoft 365 tenant, ex.: contoso.onmicrosoft.com
+SharePoint__ListData__SiteUrl | The absolute URL of the source site, ex: https://contoso.sharepoint.com/sites/mysite
+SharePoint__ListData__ListName | The name of the source list
 
 ### Dynamics 365 CRM
 
@@ -32,10 +32,10 @@ SharePoint:ListData:ListName | The name of the source list
 
 Name | Description
 --- | --- 
-Dynamics365.CRM:AzureApp:ClientId | The Application (client) ID of the Entra ID app
-Dynamics365.CRM:AzureApp:ClientSecret | The Client secret of the Entra ID app
-Dynamics365.CRM:AzureApp:Tenant | Your Microsoft 365 tenant, ex.: contoso.onmicrosoft.com
-Dynamics365.CRM:AzureApp:DynamicsUrl | The URL of your Dynamics CRM, ex.: https://mycompany.crm4.dynamics.com
+Dynamics365.CRM__AzureApp__ClientId | The Application (client) ID of the Entra ID app
+Dynamics365.CRM__AzureApp__ClientSecret | The Client secret of the Entra ID app
+Dynamics365.CRM__AzureApp__Tenant | Your Microsoft 365 tenant, ex.: contoso.onmicrosoft.com
+Dynamics365.CRM__AzureApp__DynamicsUrl | The URL of your Dynamics CRM, ex.: https://mycompany.crm4.dynamics.com
 
 7. Copy the URL of the **D365-CRM-Authorize**, open it in your browser, and approve the permission request. After that, all requests to Dynamics 365 CRM will perform on behalf of your account. The end-user will not be asked for permissions.
 
@@ -50,13 +50,13 @@ Dynamics365.CRM:AzureApp:DynamicsUrl | The URL of your Dynamics CRM, ex.: https:
 
 Name | Description
 --- | --- 
-Dynamics365.BusinessCentral:AzureApp:ClientId | The Application (client) ID of the Entra ID app
-Dynamics365.BusinessCentral:AzureApp:ClientSecret | The Client secret of the Entra ID app
-Dynamics365.BusinessCentral:AzureApp:Tenant | Your Microsoft 365 tenant, ex.: contoso.onmicrosoft.com
-Dynamics365.BusinessCentral:AzureApp:InstanceId | Your Business Central ID: https://businesscentral.dynamics.com/{instanceId}/?referrer=office
-Dynamics365.BusinessCentral:Customers:Company | The name of the source company for D365-BC-Customers function
-Dynamics365.BusinessCentral:Vendors:Company | The name of the source company for D365-BC-Vendors function
-Dynamics365.BusinessCentral:Items:Company | The name of the source company for D365-BC-Items function
+Dynamics365.BusinessCentral__AzureApp__ClientId | The Application (client) ID of the Entra ID app
+Dynamics365.BusinessCentral__AzureApp__ClientSecret | The Client secret of the Entra ID app
+Dynamics365.BusinessCentral__AzureApp__Tenant | Your Microsoft 365 tenant, ex.: contoso.onmicrosoft.com
+Dynamics365.BusinessCentral__AzureApp__InstanceId | Your Business Central ID: https://businesscentral.dynamics.com/{instanceId}/?referrer=office
+Dynamics365.BusinessCentral__Customers:Company | The name of the source company for D365-BC-Customers function
+Dynamics365.BusinessCentral__Vendors__Company | The name of the source company for D365-BC-Vendors function
+Dynamics365.BusinessCentral__Items__Company | The name of the source company for D365-BC-Items function
 
 7. Copy the URL of the **D365-BC-Authorize**, open it in your browser, and approve the permission request. After that, all requests to Business Central will perform on behalf of your account. The end-user will not be asked for permissions.
 
