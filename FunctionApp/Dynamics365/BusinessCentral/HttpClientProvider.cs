@@ -1,27 +1,13 @@
-﻿using Azure.Core;
-using Azure.Identity;
-using Microsoft.Extensions.Options;
-using Microsoft.Graph.Beta;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
-using Microsoft.Kiota.Abstractions.Authentication;
 using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
-using Plumsail.DataSource.Dynamics365.CRM;
-using System;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
-    public class HttpClientProvider
+    public class HttpClientProvider(IOptions<AppSettings> settings)
     {
-        private readonly AzureApp _azureAppSettings;
-
-        public HttpClientProvider(IOptions<AppSettings> settings)
-        {
-            _azureAppSettings = settings.Value.AzureApp;
-        }
+        private readonly AzureApp _azureAppSettings = settings.Value.AzureApp;
 
         public HttpClient Create()
         {
@@ -38,27 +24,21 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
         }
     }
 
-    class OAuthMessageHandler : DelegatingHandler
+    class OAuthMessageHandler(AzureApp azureAppSettings, HttpMessageHandler? innerHandler = null)
+        : DelegatingHandler(innerHandler ?? new HttpClientHandler())
     {
-        private readonly AzureApp _azureAppSettings;
-
-        public OAuthMessageHandler(AzureApp azureAppSettings, HttpMessageHandler? innerHandler = null) : base(innerHandler ?? new HttpClientHandler())
-        {
-            _azureAppSettings = azureAppSettings;
-        }
-
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var app = ConfidentialClientApplicationBuilder.Create(_azureAppSettings.ClientId)
-               .WithClientSecret(_azureAppSettings.ClientSecret)
-               .WithTenantId(_azureAppSettings.Tenant)
+            var app = ConfidentialClientApplicationBuilder.Create(azureAppSettings.ClientId)
+               .WithClientSecret(azureAppSettings.ClientSecret)
+               .WithTenantId(azureAppSettings.Tenant)
                .Build();
 
             var cache = new TokenCacheHelper(AzureApp.CacheFileDir);
             cache.EnableSerialization(app.UserTokenCache);
 
             var account = await app.GetAccountAsync(cache.GetAccountIdentifier());
-            var result = await app.AcquireTokenSilent(["https://api.businesscentral.dynamics.com/.default"], account).ExecuteAsync();
+            var result = await app.AcquireTokenSilent(["https://api.businesscentral.dynamics.com/.default"], account).ExecuteAsync(cancellationToken);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
             return await base.SendAsync(request, cancellationToken);
         }

@@ -2,28 +2,19 @@
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
 using Plumsail.DataSource.Dynamics365.BusinessCentral.Settings;
-using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
-    public class Authorize
+    public class Authorize(IOptions<AppSettings> settings, ILogger<Authorize> logger)
     {
-        private readonly AzureApp _settings;
-        private readonly ILogger<Authorize> _logger;
-
-        public Authorize(IOptions<AppSettings> settings, ILogger<Authorize> logger)
-        {
-            _settings = settings.Value.AzureApp;
-            _logger = logger;
-        }
+        private readonly AzureApp _settings = settings.Value.AzureApp;
+        private readonly ILogger<Authorize> _logger = logger;
 
         [Function("D365-BC-Authorize")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = "bc/authorize")] HttpRequest req)

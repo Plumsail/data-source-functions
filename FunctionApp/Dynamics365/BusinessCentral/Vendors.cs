@@ -8,27 +8,18 @@ using System.Text.Json.Nodes;
 
 namespace Plumsail.DataSource.Dynamics365.BusinessCentral
 {
-    public class Vendors
+    public class Vendors(IOptions<AppSettings> settings, HttpClientProvider httpClientProvider, ILogger<Vendors> logger)
     {
-        private readonly Settings.Vendors _settings;
-        private readonly HttpClientProvider _httpClientProvider;
-        private readonly ILogger<Vendors> _logger;
-
-        public Vendors(IOptions<AppSettings> settings, HttpClientProvider httpClientProvider, ILogger<Vendors> logger)
-        {
-            _settings = settings.Value.Vendors;
-            _httpClientProvider = httpClientProvider;
-            _logger = logger;
-        }
+        private readonly Settings.Vendors _settings = settings.Value.Vendors;
 
         [Function("D365-BC-Vendors")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = "bc/vendors/{id?}")] HttpRequest req, Guid? id)
         {
-            _logger.LogInformation("D365-BC-Vendors is requested.");
+            logger.LogInformation("D365-BC-Vendors is requested.");
 
             try
             {
-                var client = _httpClientProvider.Create();
+                var client = httpClientProvider.Create();
                 var companyId = await client.GetCompanyIdAsync(_settings.Company);
                 if (companyId == null)
                 {
@@ -63,7 +54,7 @@ namespace Plumsail.DataSource.Dynamics365.BusinessCentral
             }
             catch (HttpRequestException ex)
             {
-                _logger.LogError(ex, "An error has occured while processing D365-BC-Vendors request.");
+                logger.LogError(ex, "An error has occured while processing D365-BC-Vendors request.");
                 return new StatusCodeResult(ex.StatusCode.HasValue ? (int)ex.StatusCode.Value : StatusCodes.Status500InternalServerError);
             }
         }
