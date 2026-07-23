@@ -1,6 +1,6 @@
-# Azure Functions for retriving data from SharePoint Online, Dynamics CRM, and Dynamics 365 Business Central using Entra ID app, Microsoft Graph API and Dynamics 365 Business Central API
+# Azure Functions for retrieving data from SharePoint Online, Dynamics CRM, and Dynamics 365 Business Central using Entra ID app, Microsoft Graph API and Dynamics 365 Business Central API
 
-This repository contains Azure Functions for retrieving data from a SharePoint list, Dynamics CRM, and Dynamics 365 Business Central. These functions can be used anonymously without additional authentication and requesting permissions from the end-user. For instance, they can be utilized in public web forms as data sources for choice fields—dropdowns, checkboxes, or radios. For more inforamtion on how to install and use them, read articles on retrieving data from [SharePoint Online](https://plumsail.com/blog/how-to-provide-public-access-to-sharepoint-online-list-data/), [Dynamics 365](https://plumsail.com/blog/how-to-retrieve-data-from-dynamics-365-crm/) and [Dynamics 365 Business Central](https://plumsail.com/blog/how-to-retrieve-data-from-dynamics-365-business-central/).
+This repository contains Azure Functions for retrieving data from a SharePoint list, Dynamics CRM, and Dynamics 365 Business Central. These functions can be used anonymously without additional authentication and requesting permissions from the end-user. For instance, they can be utilized in public web forms as data sources for choice fields—dropdowns, checkboxes, or radios. For more information on how to install and use them, read articles on retrieving data from [SharePoint Online](https://plumsail.com/blog/how-to-provide-public-access-to-sharepoint-online-list-data/), [Dynamics 365](https://plumsail.com/blog/how-to-retrieve-data-from-dynamics-365-crm/) and [Dynamics 365 Business Central](https://plumsail.com/blog/how-to-retrieve-data-from-dynamics-365-business-central/).
 
 ## Installation
 
@@ -24,7 +24,7 @@ SharePoint__ListData__ListName | The name of the source list
 ### Dynamics 365 CRM
 
 1. Open [Microsoft Entra admin center](https://entra.microsoft.com/)
-2. [Register an app](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app?tabs=client-secret#register-an-application) and add delegated permissions to Dynamics CRM: **Dynamics CRM** → **user_impersanation**.
+2. [Register an app](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app?tabs=client-secret#register-an-application) and add delegated permissions to Dynamics CRM: **Dynamics CRM** → **user_impersonation**.
 3. Fork this repository.
 4. Sign in to the [Azure portal](https://portal.azure.com/), [create a function app](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-function-app-portal), and deploy your forked repository.
 5. Copy the URL of the **D365-CRM-Authorize** function and paste it to **Authentication** → **Web** → **Redirect URIs** of the Entra ID app
